@@ -56,8 +56,8 @@ def read_text_file(file_path):
 	with open(file_path, 'r',  encoding="utf8") as f:
 		return f.read()
  
-nltk.data.path.append("C:\\Users\\julia\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\nltk\\") 
-nltk.download('punkt')
+#nltk.data.path.append("C:\\Users\\julia\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\nltk\\") 
+#nltk.download('punkt')
 for root, dirs, files in os.walk("./corpus", topdown=False):
 	for name in files:
 		with open(f'{preprocessing_path}/{name}', 'w', encoding='utf-8') as process_file:
