@@ -2,7 +2,8 @@
 import nltk
 import string
 import re
-
+import keyword_extractor
+import spacy_extractor
 import os
 path = './corpus'
 preprocessing_path = "./processed-corpus"
@@ -59,16 +60,23 @@ def read_text_file(file_path):
 
 #nltk.data.path.append("C:\\Users\\julia\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\nltk\\") 
 #nltk.download('punkt')
+with open('./keywords.txt', 'w', encoding='utf-8') as fo:
 
-for root, dirs, files in os.walk("./corpus", topdown=False):
-	for name in files:
-		with open(f'{preprocessing_path}/{name}', 'w', encoding='utf-8') as process_file:
-			print(os.path.join(root, name))
-			str_file = read_text_file(os.path.join(root, name))
-			str_file = text_lowercase(str_file) 
-			str_file = remove_punctuation(str_file)
-			str_file = remove_whitespace(str_file)
-			str_file = remove_stopwords(str_file)
-			str_file = str_file.encode(encoding="utf8")
+	for root, dirs, files in os.walk("./corpus", topdown=False):
+		for name in files:
+			with open(f'{preprocessing_path}/{name}', 'w', encoding='utf-8') as process_file:
+				print(os.path.join(root, name))
+				str_file = read_text_file(os.path.join(root, name))
+				str_file = text_lowercase(str_file) 
+				str_file = remove_punctuation(str_file)
+				str_file = remove_whitespace(str_file)
+				#extraer terminos antes de eliminar stop words
+				keyword = keyword_extractor.extract_keywords(str_file)
+				#keyword = spacy_extractor.get_hotwords(str_file)
+				keyword = ' '.join(str(e) for e in keyword)
+				fo.write(keyword)
+				break
+				str_file = remove_stopwords(str_file)
+				str_file = str_file.encode(encoding="utf8")
 
-			process_file.write(str_file.decode(encoding="utf8"))
+				process_file.write(str_file.decode(encoding="utf8"))
