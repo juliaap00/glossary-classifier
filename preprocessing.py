@@ -30,7 +30,10 @@ def remove_punctuation(text):
 	return text.translate(translator)
 
 # remove whitespace from text
-def remove_whitespace(text):
+def remove_whitespace(text, keepSpaces):
+	output   = re.sub(r"[\n]*", "", text)
+	if keepSpaces:
+		return output
 	return  " ".join(text.split())
 
 #Stop words --> español ver listas y comparar
@@ -44,7 +47,7 @@ def remove_stopwords(text):
 	#stop_words = set(stopWords)
 	word_tokens = word_tokenize(text)
 	filtered_text = [word for word in word_tokens if word not in stop_words]
-	filtered_text = ','.join(filtered_text)
+
 	return filtered_text
 
 def read_files():
@@ -79,15 +82,18 @@ def preprocess_corpus(file_str):
 	file_str = remove_punctuation(file_str)
 	return file_str
 
-def process_corpus(text_str):
-	text_str = remove_whitespace(text_str)
-	text_str = remove_stopwords(text_str)
-	word_list_text = list(text_str.split(","))
-	
-	return word_list_text
+def process_corpus(text_str, get_list, keepSpaces):
+	text_str = remove_whitespace(text_str, keepSpaces)
+	text_list_str = remove_stopwords(text_str)
 
-def list_to_strin(lista):
-	lista = ', '.join(str(e) for e in lista)
+	if get_list == False:
+		text_str = list_to_string(text_list_str)
+		return text_str
+	else:
+		return text_list_str
+
+def list_to_string(lista):
+	lista = ' '.join(str(e) for e in lista)
 	return lista
 
 def remove_duplicated(list):
@@ -117,48 +123,48 @@ def get_glossary(word_list_text, keyword_list, category):
 
 #nltk.data.path.append("C:\\Users\\julia\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\nltk\\") 
 #nltk.download('punkt')
+def create_all_glossary():
+	#------- main ------
+	keyword_health = []
+	keyword_politics = []
+	keyword_sport = []
 
-#------- main ------
-keyword_health = []
-keyword_politics = []
-keyword_sport = []
+	politics_file = open("./corpus/corpus_politica.txt", "w", encoding='utf-8')
+	health_file = open('./corpus/corpus_salud.txt', 'w', encoding='utf-8')
+	sport_file = open('./corpus/corpus_deporte.txt', 'w', encoding='utf-8')
+	merge_corpus(politics_file, health_file, sport_file)
+		
+	politics_file_str = read_text_file("./corpus/corpus_politica.txt")
+	health_file_str = read_text_file("./corpus/corpus_salud.txt")
+	sport_file_str = read_text_file("./corpus/corpus_deporte.txt")
 
-politics_file = open("./corpus/corpus_politica.txt", "w", encoding='utf-8')
-health_file = open('./corpus/corpus_salud.txt', 'w', encoding='utf-8')
-sport_file = open('./corpus/corpus_deporte.txt', 'w', encoding='utf-8')
-merge_corpus(politics_file, health_file, sport_file)
-	
-politics_file_str = read_text_file("./corpus/corpus_politica.txt")
-health_file_str = read_text_file("./corpus/corpus_salud.txt")
-sport_file_str = read_text_file("./corpus/corpus_deporte.txt")
+	sport_keywords_file = open('./keywords-deporte.txt', 'w', encoding='utf-8')
+	politics_keywords_file = open('./keywords-politca.txt', 'w', encoding='utf-8')
+	health_keywords_file = open('./keywords-salud.txt', 'w', encoding='utf-8')
 
-sport_keywords_file = open('./keywords-deporte.txt', 'w', encoding='utf-8')
-politics_keywords_file = open('./keywords-politca.txt', 'w', encoding='utf-8')
-health_keywords_file = open('./keywords-salud.txt', 'w', encoding='utf-8')
+	# get keywords
+	keywords(keyword_health, health_file_str)
+	keywords(keyword_politics, politics_file_str)
+	keywords(keyword_sport, sport_file_str)
 
-# get keywords
-keywords(keyword_health, health_file_str)
-keywords(keyword_politics, politics_file_str)
-keywords(keyword_sport, sport_file_str)
+	health_keywords_file.write(list_to_string(keyword_health))
+	politics_keywords_file.write(list_to_string(keyword_politics))
+	sport_keywords_file.write(list_to_string(keyword_sport))
 
-health_keywords_file.write(list_to_strin(keyword_health))
-politics_keywords_file.write(list_to_strin(keyword_politics))
-sport_keywords_file.write(list_to_strin(keyword_sport))
+	#second processing	
+	word_list_health = process_corpus(health_file_str, True, False)
+	word_list_politics = process_corpus(politics_file_str,True, False)
+	word_list_sport = process_corpus(sport_file_str, True, False)
 
-#second processing	
-word_list_health = process_corpus(health_file_str)
-word_list_politics = process_corpus(politics_file_str)
-word_list_sport = process_corpus(sport_file_str)
+	#get glossary
+	health_glossary = get_glossary(word_list_health, keyword_health,"salud")
+	politics_glossary = get_glossary(word_list_politics,keyword_politics,"politica")
+	sport_glossary = get_glossary(word_list_sport,keyword_sport,"deportes")
 
-#get glossary
-health_glossary = get_glossary(word_list_health, keyword_health,"salud")
-politics_glossary = get_glossary(word_list_politics,keyword_politics,"politica")
-sport_glossary = get_glossary(word_list_sport,keyword_sport,"deportes")
+	politics_file.close()
+	health_file.close()
+	sport_file.close()
 
-politics_file.close()
-health_file.close()
-sport_file.close()
-
-health_keywords_file.close()
-politics_keywords_file.close()
-sport_keywords_file.close()
+	health_keywords_file.close()
+	politics_keywords_file.close()
+	sport_keywords_file.close()

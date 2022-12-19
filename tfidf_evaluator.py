@@ -16,7 +16,7 @@ def tfidf(myvocabulary, category):
 
 	vectorizer = TfidfVectorizer(input='filename', vocabulary = myvocabulary, ngram_range=(1,3))
 	vect_matrix = vectorizer.fit_transform(corpus)
-
+	print(vect_matrix)
 	words = vectorizer.get_feature_names_out()
 	docs = vect_matrix.toarray()
 	words_tfidf = []
