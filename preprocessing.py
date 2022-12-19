@@ -5,6 +5,7 @@ import re
 import keyword_extractor
 import spacy_extractor
 import os
+import tfidf_evaluator
 special_char = "”“'ª»«...—‘’º"
 path = './corpus'
 preprocessing_path = "./processed-corpus"
@@ -13,15 +14,11 @@ stopWords = ["actualmente","acuerdo","adelante","ademas","además","adrede","afi
 def text_lowercase(text):
 	return text.lower()
 
-
 # Eliminar los numeros o convertirlos a tedxto --> ingles
 def remove_numbers(text):
-
 	result = ''.join([i for i in text if not i.isdigit()])
-
 	#result = re.sub(r' \d+ ', '', text)
 	#result = re.sub(r' \d+', '', text)
-
 	return result
 
 #Eliminar simbolos de puntuacion
@@ -36,7 +33,6 @@ def remove_punctuation(text):
 def remove_whitespace(text):
 	return  " ".join(text.split())
 
-
 #Stop words --> español ver listas y comparar
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -44,30 +40,26 @@ from nltk.tokenize import word_tokenize
 # remove stopwords function
 def remove_stopwords(text):
 	stop_words = set(stopwords.words("spanish"))
+	stop_words.update(set(stopWords))
 	#stop_words = set(stopWords)
 	word_tokens = word_tokenize(text)
 	filtered_text = [word for word in word_tokens if word not in stop_words]
 	filtered_text = ','.join(filtered_text)
 	return filtered_text
 
-
 def read_files():
 	for file in os.listdir():
 		# Check whether file is in text format or not
 		if file.endswith(".txt"):
 			file_path = f"{path}/{file}"
-	  
 			# call read text file function
 			read_text_file(file_path)
-
-
 
 def read_text_file(file_path):
 	#os.chdir(path)
 	with open(file_path, 'r',  encoding="utf8") as f:
 		return f.read()
  
-
 def merge_corpus(politics_file,health_file, sport_file):
 	for root, dirs, files in os.walk("./corpus/train", topdown=False):
 		for name in files:
@@ -82,65 +74,69 @@ def merge_corpus(politics_file,health_file, sport_file):
 				politics_file.write(file_str)
 
 def preprocess_corpus(file_str):
-	
 	file_str = text_lowercase(file_str)
 	file_str = remove_numbers(file_str) 
 	file_str = remove_punctuation(file_str)
-	
 	return file_str
+
+def process_corpus(text_str):
+	text_str = remove_whitespace(text_str)
+	text_str = remove_stopwords(text_str)
+	word_list_text = list(text_str.split(","))
+	
+	return word_list_text
 
 def list_to_strin(lista):
 	lista = ', '.join(str(e) for e in lista)
 	return lista
+
+def remove_duplicated(list):
+	list_aux = []
+	[list_aux.append(item) for item in list if item not in list_aux]
+	return	list_aux
+
 def keywords(keyword_list, file_str):
 	keyword_yake = keyword_extractor.extract_keywords_yake(file_str)
 	keyword_rake = keyword_extractor.extract_keywords_rake(file_str,2 ,3)
-	keyword_rake = list(set(keyword_rake))
-
 	# keyword_rake = keyword_extractor.extract_keywords_rake(file_str,1 ,1)
 	# keyword_rake = keyword_extractor.extract_keywords_rake(file_str,2 ,2)
-
-
-
-
-	
-	
 	keyword_list.extend(keyword_yake)
 	keyword_list.extend(keyword_rake)
+	keyword_list = list(set(keyword_list))
 
+def get_glossary(word_list_text, keyword_list, category):
+	vocabulary = []
+	vocabulary.extend(word_list_text)
+	vocabulary.extend(keyword_list)
+	vocabulary = remove_duplicated(vocabulary)
+
+	glossary = tfidf_evaluator.tfidf(vocabulary, category)
+	
+	glossary.to_excel(f"./glossary/{category}.xlsx")  
+	return glossary  
 
 #nltk.data.path.append("C:\\Users\\julia\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\nltk\\") 
 #nltk.download('punkt')
 
+#------- main ------
 keyword_health = []
 keyword_politics = []
 keyword_sport = []
-
-
-
 
 politics_file = open("./corpus/corpus_politica.txt", "w", encoding='utf-8')
 health_file = open('./corpus/corpus_salud.txt', 'w', encoding='utf-8')
 sport_file = open('./corpus/corpus_deporte.txt', 'w', encoding='utf-8')
 merge_corpus(politics_file, health_file, sport_file)
-
-
 	
 politics_file_str = read_text_file("./corpus/corpus_politica.txt")
 health_file_str = read_text_file("./corpus/corpus_salud.txt")
-
 sport_file_str = read_text_file("./corpus/corpus_deporte.txt")
-
-
-#politics_file_str = read_text_file(politics_file)
-#health_file_str = read_text_file(health_file)
-#sport_file_str = read_text_file(sport_file)
-
 
 sport_keywords_file = open('./keywords-deporte.txt', 'w', encoding='utf-8')
 politics_keywords_file = open('./keywords-politca.txt', 'w', encoding='utf-8')
 health_keywords_file = open('./keywords-salud.txt', 'w', encoding='utf-8')
 
+# get keywords
 keywords(keyword_health, health_file_str)
 keywords(keyword_politics, politics_file_str)
 keywords(keyword_sport, sport_file_str)
@@ -149,43 +145,15 @@ health_keywords_file.write(list_to_strin(keyword_health))
 politics_keywords_file.write(list_to_strin(keyword_politics))
 sport_keywords_file.write(list_to_strin(keyword_sport))
 
+#second processing	
+word_list_health = process_corpus(health_file_str)
+word_list_politics = process_corpus(politics_file_str)
+word_list_sport = process_corpus(sport_file_str)
 
-# vocab para cada uno 
-
-
-# palabras procesadas en listas por cada clase
-
-
-#llamar a tf-if
-
-
-#print(keyword_health)
-#print(keyword_politics)
-print(keyword_sport)
-
-		
-politics_file_str = remove_whitespace(politics_file_str)
-health_file_str = remove_whitespace(health_file_str)
-sport_file_str = remove_whitespace(sport_file_str)
-
-#extraer terminos antes de eliminar stop words
-
-politics_file_str = remove_stopwords(politics_file_str)
-word_list_politics = list(politics_file_str.split(" "))
-
-health_file_str = remove_stopwords(health_file_str)
-word_list_health = list(health_file_str.split(" "))
-
-
-sport_file_str = remove_stopwords(sport_file_str)
-word_list_sport = list(sport_file_str.split(" "))
-
-#print(word_list_sport)
-
-#algunos caracteres no se eliminan correctamente, numeros, ”, 
-# str_file = str_file.encode(encoding="utf8")
-
-# process_file.write(str_file.decode(encoding="utf8"))
+#get glossary
+health_glossary = get_glossary(word_list_health, keyword_health,"salud")
+politics_glossary = get_glossary(word_list_politics,keyword_politics,"politica")
+sport_glossary = get_glossary(word_list_sport,keyword_sport,"deportes")
 
 politics_file.close()
 health_file.close()
