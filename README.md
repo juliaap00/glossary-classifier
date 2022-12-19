@@ -6,3 +6,4 @@ pip install rake-nltk
 pip install pandas
 
 pip install sklearn
+pip install scikit-learn
