@@ -5,7 +5,7 @@ def extract_keywords_yake(text):
     deduplication_thresold = 0.5 #evitar que se repitan palabras
     deduplication_algo = 'seqm'
     windowSize = 15
-    numOfKeywords = 5
+    numOfKeywords = 10
 
     kw_extractor = yake.KeywordExtractor(lan=language, 
                                          n=max_ngram_size, 
@@ -14,26 +14,27 @@ def extract_keywords_yake(text):
                                          windowsSize=windowSize, 
                                          top=numOfKeywords)
     keywords = kw_extractor.extract_keywords(text)
-    print(type(keywords[0]))
-    return keywords
+    keywords_list = []
+    for item in keywords:
+        keywords_list.append(item[0])
+    return keywords_list
                       
 
 
 from rake_nltk import Rake
 
-def extract_keywords_rake(text):
+def extract_keywords_rake(text, min_size, max_size):
     language = "spanish"
-    min_ngram_size = 2
-    max_ngram_size = 3
+    min_ngram_size = min_size
+    max_ngram_size = max_size
 
     rake_nltk_var = Rake( language = language
                         , min_length = min_ngram_size
-                        , max_length = max_ngram_size = 3
+                        , max_length = max_ngram_size
                         )
 
     rake_nltk_var.extract_keywords_from_text(text)
 
-    # keyword_extracted = rake_nltk_var.get_ranked_phrases()
-    keyword_extracted = rake_nltk_var.get_ranked_phrases_with_scores()
-
+    keyword_extracted = rake_nltk_var.get_ranked_phrases()
+    #keyword_extracted = rake_nltk_var.get_ranked_phrases_with_scores()
     return keyword_extracted
