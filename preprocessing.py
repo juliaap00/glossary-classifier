@@ -123,6 +123,8 @@ def get_glossary(word_list_text, keyword_list, category):
 
 #nltk.data.path.append("C:\\Users\\julia\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\nltk\\") 
 #nltk.download('punkt')
+
+#poner en otro fichero
 def create_all_glossary():
 	#------- main ------
 	keyword_health = []
