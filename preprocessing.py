@@ -59,7 +59,9 @@ def read_files():
 def read_text_file(file_path):
 	#os.chdir(path)
 	with open(file_path, 'r',  encoding="utf8") as f:
-		return f.read()
+		str_file = f.read()
+		f.close()
+		return str_file
  
 def merge_corpus(politics_file,health_file, sport_file):
 	for root, dirs, files in os.walk("./corpus/train", topdown=False):

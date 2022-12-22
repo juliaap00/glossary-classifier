@@ -41,8 +41,8 @@ for root, dirs, files in os.walk("./corpus/", topdown=False):
 df_train_shuffled = df_train.sample(frac=1).reset_index(drop=True)
 df_test_shuffled = df_test.sample(frac=1).reset_index(drop=True)
 
-df_train_shuffled.to_excel(f"./corpus/train.xlsx")
-df_test_shuffled.to_excel(f"./corpus/test.xlsx")
+df_train_shuffled.to_excel(f"./corpus/train.xlsx",  index=False)
+df_test_shuffled.to_excel(f"./corpus/test.xlsx",  index=False)
 
 
 
