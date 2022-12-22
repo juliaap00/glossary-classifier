@@ -10,7 +10,7 @@ def code_to_class(code):
 		return 'salud'
 	return 'politica'
 
-results_df = pd.read_excel("./corpus/test-predicciones.xlsx")
+results_df = pd.read_excel("./corpus/test_results.xlsx")
 clasification_path = './clasification/'
 results_df.sort_values("predicted_class")
 
@@ -29,8 +29,6 @@ def get_file_name(predicted_class, name):
 	new_name = f"{index}-{name}"
 	return new_name
 
-
-
 for root, dirs, files in os.walk("./corpus/test", topdown=False):
 	for name in files:
 		predicted_class = results_df.loc[results_df['name'] == name]['predicted_class']
@@ -41,4 +39,3 @@ for root, dirs, files in os.walk("./corpus/test", topdown=False):
 		new_file.write(file_str)
 		new_file.close()
 
-#for ind in df.index:
